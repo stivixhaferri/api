@@ -3,18 +3,16 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-const uri = process.env.MONGODB_URI;
+const uri = 'mongodb+srv://stivixhaferri01:SLUTKOoW1PZdudZl@cluster0.hwkgbyk.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0';
 
 const connect = async () => {
   try {
     await mongoose.connect(uri, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true
     });
     console.log('MongoDB Connected');
   } catch (err) {
     console.error(err);
-    process.exit(1); // Exit process with failure
+    process.exit(1); 
   }
 };
 
