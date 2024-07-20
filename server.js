@@ -26,7 +26,7 @@ const authLimiter = rateLimit({
 
 
 const corsOptions = {
-    origin: 'http://localhost:3000',
+    origin: 'https://art-front-uazd.onrender.com/',
     credentials: true,
 };
 
