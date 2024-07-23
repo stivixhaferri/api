@@ -80,6 +80,11 @@ app.get('/api/random', random)
 app.get('/api/enable', enableCar);
 app.post('/api/contact', authLimiter , contactUs)
 
+
+app.get('/', (req, res) => {
+    res.send('Hello World!');
+  });
+  
 const PORT = process.env.PORT || 8001;
 app.listen(PORT , () => {
     console.log(`Server is running on port ${PORT}`)
