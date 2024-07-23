@@ -86,8 +86,8 @@ export const postCar = async (req, res) => {
         
 
             // Build URLs for uploaded files
-            const coverImageUrl = cover ? `https://api-jgg9.onrender.com/uploads/${cover.filename}` : '';
-            const imageUrls = images.map(image => `https://api-jgg9.onrender.com/uploads/${image.filename}`);
+            const coverImageUrl = cover ? `http://localhost:8000/uploads/${cover.filename}` : '';
+            const imageUrls = images.map(image => `http://localhost:8000/uploads/${image.filename}`);
             
             // Save car data to MongoDB
             const car = new CarModel({
