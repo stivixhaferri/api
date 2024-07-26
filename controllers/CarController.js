@@ -177,7 +177,9 @@ export const register = async (req, res) => {
         // Set cookie
         res.cookie('jwt', token, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
+            secure: true,
+            domain: 'albaniarentaltourism.com',
+            sameSite: 'None',
             maxAge: 24 * 60 * 60 * 1000
         });
 
@@ -198,7 +200,8 @@ export const logout = async (req, res) => {
             httpOnly: true,
             expires: new Date(0),
             sameSite: 'none',
-            secure: true,  // Add secure flag if using HTTPS
+            secure: true, 
+            domain: 'albaniarentaltourism.com',
         });
 
         // Respond with a JSON message indicating successful logout
@@ -238,7 +241,8 @@ export const login = async (req, res) => {
         // Set cookie
         res.cookie('jwt', token, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
+            secure: true,
+            sameSite: 'None',
             maxAge:24 * 60 * 60 * 1000
         });
 
