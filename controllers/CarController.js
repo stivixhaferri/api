@@ -239,12 +239,12 @@ export const login = async (req, res) => {
         const token = jwt.sign({ userId: user._id }, sk, { expiresIn: '1h' });
 
         // Set cookie
-        res.cookie('jwt', token, {
-            httpOnly: true,
-            secure: true,
-            sameSite: 'None',
-            maxAge:24 * 60 * 60 * 1000
-        });
+        // res.cookie('jwt', token, {
+        //     httpOnly: true,
+        //     secure: true,
+        //     sameSite: 'None',
+        //     maxAge:24 * 60 * 60 * 1000
+        // });
 
         // Send response
         res.status(200).json({ msg: 'User logged in successfully', user , token });
