@@ -26,7 +26,7 @@ const authLimiter = rateLimit({
 
 
 const corsOptions = {
-    origin: 'https://art-front-uazd.onrender.com/',
+    origin: 'https://albaniarentaltourism.com',
     credentials: true,
 };
 
