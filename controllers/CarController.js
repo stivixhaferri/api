@@ -8,7 +8,7 @@ import bcrypt from 'bcryptjs'
 import CommentModel from '../models/Comment.js';
 import BookModel from '../models/Book.js';
 import { Resend } from 'resend';
-import UploadThing from 'uploadthing'
+
 import moment from 'moment'
 
 
@@ -125,88 +125,7 @@ const uploadHandler = upload.fields([{ name: 'cover' }, { name: 'images' } ]);
 // };
 
 //Upload Post With UploadThing
-const uploadThing = new UploadThing({
-    apiKey: process.env.UPLOADTHING_SECRET,
-    appId: process.env.UPLOADTHING_APP_ID
-});
 
-export const postCar = async (req, res) => {
-    // Extract token from headers
-    const token = req.headers.token;
-
-    if (!token) {
-        return res.status(401).json({ message: 'Access denied. No token provided.' });
-    }
-
-    try {
-        // Verify the token and get user data
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        req.user = decoded;
-
-        const userId = req.user.id;
-        const user = await UserModel.findById(userId);
-
-        if (!user) {
-            return res.status(404).json({ message: 'User not found.' });
-        }
-
-        if (user.status !== 'true') {
-            return res.json({ msg: 'You cannot access', status: 700 });
-        }
-
-        // Extract file data from req.files
-        const cover = req.files.cover ? req.files.cover[0] : null;
-        const images = req.files.images || [];
-
-        // Function to upload files to UploadThing and return the URL
-        const uploadToUploadThing = async (file) => {
-            try {
-                const response = await uploadThing.upload(file.buffer, {
-                    filename: file.originalname,
-                    contentType: file.mimetype
-                });
-                return response.url;
-            } catch (error) {
-                console.error('Error uploading file to UploadThing:', error);
-                throw error;
-            }
-        };
-
-        // Upload cover image and images to UploadThing
-        const coverImageUrl = cover ? await uploadToUploadThing(cover) : '';
-        const imageUrls = await Promise.all(images.map(image => uploadToUploadThing(image)));
-
-        // Extract form data from req.body
-        const { title, make, model, year, transmission, fuel, rate, city, start_date, end_date, location, description } = req.body;
-
-        // Save car data to MongoDB
-        const car = new CarModel({
-            title,
-            make,
-            model,
-            year,
-            transmission,
-            fuel,
-            rate,
-            city,
-            start_date,
-            end_date,
-            location,
-            description,
-            cover: coverImageUrl,
-            images: imageUrls,
-            userId: decoded.userId,
-        });
-
-        await car.save();
-
-        res.status(200).json({ message: 'Car created successfully.' });
-
-    } catch (error) {
-        console.log(error);
-        res.status(500).json({ message: error.message });
-    }
-};
 
 
 
