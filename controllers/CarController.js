@@ -247,7 +247,7 @@ export const login = async (req, res) => {
         });
 
         // Send response
-        res.status(200).json({ msg: 'User logged in successfully', user });
+        res.status(200).json({ msg: 'User logged in successfully', user , token });
 
     } catch (error) {
         console.error(error);
