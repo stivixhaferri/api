@@ -30,7 +30,7 @@ const upload = multer({
             cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
         }
     }),
-    limits: { fileSize: 5 * 1024 * 1024 },  // 5 MB file size limit for uploads
+    limits: { fileSize: 5 * 1024 * 1024 },  
     fileFilter: (req, file, cb) => {
         if (file.mimetype.startsWith('image/')) {
             cb(null, true);
@@ -48,7 +48,7 @@ export const postCar = async (req, res) => {
    
     uploadHandler(req, res, async (err) => {
         if (err) {
-            return res.status(400).json({ message: err.message });
+            return res.status(400).json({ message: err });
         }
 
         // Extract token from headers
