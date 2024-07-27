@@ -10,7 +10,7 @@ import BookModel from '../models/Book.js';
 import { Resend } from 'resend';
 
 import moment from 'moment'
-
+import B2 from 'backblaze-b2';
 
 
 
@@ -47,14 +47,98 @@ const upload = multer({
 const uploadHandler = upload.fields([{ name: 'cover' }, { name: 'images' } ]);
 
 // Post Car Route
-export const postCar = async (req, res) => {
+// export const postCar = async (req, res) => {
    
+//     uploadHandler(req, res, async (err) => {
+//         if (err) {
+//             return res.status(400).json({ message: err });
+//         }
+
+//         // Extract token from headers
+//         const token = req.headers.token;
+
+//         if (!token) {
+//             return res.status(401).json({ message: 'Access denied. No token provided.' });
+//         }
+
+//         try {
+//             // Verify the token and get user data
+//             const decoded = jwt.verify(token, sk);
+//             req.user = decoded;
+            
+//             const userId = req.user.id;
+//             const user = await UserModel.findById(decoded.userId);
+
+//             if (!user) {
+//                 return res.status(404).json({ message: 'User not found.' });
+//             }
+
+//             if(user.status != 'true'){
+//                 return res.json({msg: 'You Can not Access', status: 700})
+//             }
+
+//              // Extract file data from req.files
+//              const cover = req.files.cover ? req.files.cover[0] : null;
+//              const license = req.files.license ? req.files.license[0] : null;
+//              const images = req.files.images ? req.files.images : [];
+             
+
+//             // Extract form data from req.body
+//             const {title,  make, model, year,  transmission, fuel, rate, city, start_date , end_date , location, description } = req.body;
+          
+        
+
+//             // Build URLs for uploaded files
+//             const coverImageUrl = cover ? `https://server.albaniarentaltourism.com/uploads/${cover.filename}` : '';
+//             const imageUrls = images.map(image => `https://server.albaniarentaltourism.com/uploads/${image.filename}`);
+            
+//             // Save car data to MongoDB
+//             const car = new CarModel({
+//                 title,
+//                 make,
+//                 model,
+//                 year,
+//                 transmission: transmission,
+//                 fuel,
+//                 rate,
+//                 city,
+//                 start_date,
+//                 end_date,
+//                 location,
+//                 description,
+//                 cover: coverImageUrl,
+              
+//                 images: imageUrls,
+//                 userId: decoded.userId,
+                
+//             });
+
+//             await car.save();
+
+//             res.status(200).json({ message: 'Car created successfully.' });
+
+//         } catch (error) {
+//             console.log(error);
+//             res.status(500).json({ message: error.message });
+//         }
+//     });
+// };
+
+
+
+//Upload Post With UploadThing
+const b2 = new B2({
+    applicationKeyId: 'K005B9oG7ndPfC05iAj7Nk9/tExEvAU',
+    applicationKey: '66240b69421df70396030e15'
+});
+
+
+export const postCar = async (req, res) => {
     uploadHandler(req, res, async (err) => {
         if (err) {
             return res.status(400).json({ message: err });
         }
 
-        // Extract token from headers
         const token = req.headers.token;
 
         if (!token) {
@@ -62,10 +146,9 @@ export const postCar = async (req, res) => {
         }
 
         try {
-            // Verify the token and get user data
             const decoded = jwt.verify(token, sk);
             req.user = decoded;
-            
+
             const userId = req.user.id;
             const user = await UserModel.findById(decoded.userId);
 
@@ -73,44 +156,49 @@ export const postCar = async (req, res) => {
                 return res.status(404).json({ message: 'User not found.' });
             }
 
-            if(user.status != 'true'){
-                return res.json({msg: 'You Can not Access', status: 700})
+            if (user.status !== 'true') {
+                return res.json({ msg: 'You cannot access', status: 700 });
             }
 
-             // Extract file data from req.files
-             const cover = req.files.cover ? req.files.cover[0] : null;
-             const license = req.files.license ? req.files.license[0] : null;
-             const images = req.files.images ? req.files.images : [];
-             
+            const cover = req.files.cover ? req.files.cover[0] : null;
+            const images = req.files.images ? req.files.images : [];
 
-            // Extract form data from req.body
-            const {title,  make, model, year,  transmission, fuel, rate, city, start_date , end_date , location, description } = req.body;
-          
-        
+            // Authorize Backblaze B2
+            await b2.authorize();
 
-            // Build URLs for uploaded files
-            const coverImageUrl = cover ? `https://server.albaniarentaltourism.com/uploads/${cover.filename}` : '';
-            const imageUrls = images.map(image => `https://server.albaniarentaltourism.com/uploads/${image.filename}`);
-            
-            // Save car data to MongoDB
+            const uploadFile = async (file) => {
+                const response = await b2.getUploadUrl({ bucketId: '66240b69421df70396030e15' });
+                const { uploadUrl, authorizationToken } = response.data;
+
+                const uploadResponse = await b2.uploadFile({
+                    uploadUrl,
+                    uploadAuthToken: authorizationToken,
+                    fileName: file.originalname,
+                    data: file.buffer
+                });
+
+                return `https://f000.backblazeb2.com/file/artstorage/${uploadResponse.data.fileName}`;
+            };
+
+            const coverImageUrl = cover ? await uploadFile(cover) : '';
+            const imageUrls = await Promise.all(images.map(uploadFile));
+
             const car = new CarModel({
-                title,
-                make,
-                model,
-                year,
-                transmission: transmission,
-                fuel,
-                rate,
-                city,
-                start_date,
-                end_date,
-                location,
-                description,
+                title: req.body.title,
+                make: req.body.make,
+                model: req.body.model,
+                year: req.body.year,
+                transmission: req.body.transmission,
+                fuel: req.body.fuel,
+                rate: req.body.rate,
+                city: req.body.city,
+                start_date: req.body.start_date,
+                end_date: req.body.end_date,
+                location: req.body.location,
+                description: req.body.description,
                 cover: coverImageUrl,
-              
                 images: imageUrls,
-                userId: decoded.userId,
-                
+                userId: decoded.userId
             });
 
             await car.save();
@@ -123,9 +211,6 @@ export const postCar = async (req, res) => {
         }
     });
 };
-
-//Upload Post With UploadThing
-
 
 
 
