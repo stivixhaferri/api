@@ -26,25 +26,25 @@ const resend = new Resend(`re_KTgUptqo_HjmVkjpR6jWXQxsVKZj9RKQ3`);
 
 
 // Configure Multer for file uploads
-// const upload = multer({
-//     storage: multer.diskStorage({
-//         destination: (req, file, cb) => {
-//             cb(null, 'uploads/');
-//         },
-//         filename: (req, file, cb) => {
-//             const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-//             cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
-//         }
-//     }),
-//     limits: { fileSize: 5 * 1024 * 1024 },  
-//     fileFilter: (req, file, cb) => {
-//         if (file.mimetype.startsWith('image/')) {
-//             cb(null, true);
-//         } else {
-//             cb(new Error('Invalid file type. Only image files are allowed.'), false);
-//         }
-//     }
-// });
+const upload = multer({
+    storage: multer.diskStorage({
+        destination: (req, file, cb) => {
+            cb(null, 'uploads/');
+        },
+        filename: (req, file, cb) => {
+            const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+            cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
+        }
+    }),
+    limits: { fileSize: 5 * 1024 * 1024 },  
+    fileFilter: (req, file, cb) => {
+        if (file.mimetype.startsWith('image/')) {
+            cb(null, true);
+        } else {
+            cb(new Error('Invalid file type. Only image files are allowed.'), false);
+        }
+    }
+});
 
 // Middleware to handle file uploads and parse form data
 const uploadHandler = upload.fields([{ name: 'cover' }, { name: 'images' } ]);
