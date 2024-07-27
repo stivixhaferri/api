@@ -132,9 +132,9 @@ const b2 = new B2({
     applicationKey: '66240b69421df70396030e15'
 });
 
-
 export const postCar = async (req, res) => {
-    uploadHandler(req, res, async (err) => {
+    // Use multer middleware directly in your route
+    upload.fields([{ name: 'cover' }, { name: 'images' }])(req, res, async (err) => {
         if (err) {
             return res.status(400).json({ message: err });
         }
@@ -149,7 +149,6 @@ export const postCar = async (req, res) => {
             const decoded = jwt.verify(token, sk);
             req.user = decoded;
 
-            const userId = req.user.id;
             const user = await UserModel.findById(decoded.userId);
 
             if (!user) {
