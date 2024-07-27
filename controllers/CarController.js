@@ -20,8 +20,7 @@ const resendKey = process.env.RESEND_KEY
 const resend = new Resend(`re_KTgUptqo_HjmVkjpR6jWXQxsVKZj9RKQ3`);
 
 
-const storage = multer.memoryStorage();
-const upload = multer({ storage });
+
 
 
 
@@ -131,6 +130,9 @@ const uploadHandler = upload.fields([{ name: 'cover' }, { name: 'images' } ]);
 
 
 //Upload Post With UploadThing
+
+const storage = multer.memoryStorage();
+const upload = multer({ storage });
 const b2 = new B2({
     applicationKeyId: 'K005B9oG7ndPfC05iAj7Nk9/tExEvAU',
     applicationKey: '66240b69421df70396030e15'
@@ -210,7 +212,7 @@ export const postCar = async (req, res) => {
 
         } catch (error) {
             console.log(error);
-            res.status(500).json({ message: error.message });
+            res.status(500).json({ message: error });
         }
     });
 };
