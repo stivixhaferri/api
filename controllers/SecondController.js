@@ -94,7 +94,7 @@ export const postCar = async (req, res) => {
                 description,
                 cover: coverImageUrl,
                 images: imageUrls,
-                userId,
+                userId : decoded.userId,
             });
 
             await car.save();
