@@ -53,7 +53,7 @@ export const postCar = async (req, res) => {
             req.user = decoded;
 
             const userId = req.user.id;
-            const user = await UserModel.findById(userId);
+            const user = await UserModel.findById(decoded.userId);
 
             if (!user) {
                 return res.status(404).json({ message: 'User not found.' });
