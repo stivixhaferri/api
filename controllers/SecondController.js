@@ -1,10 +1,9 @@
 import multer from 'multer';
-import { getStorage, uploadBytes, ref } from 'firebase/storage';
+import { getStorage, uploadBytes, ref, getDownloadURL } from 'firebase/storage';
 import UserModel from '../models/User.js';
 import CarModel from '../models/Car.js';
 import jwt from 'jsonwebtoken';
 import { initializeApp } from 'firebase/app';
-
 
 // Firebase configuration
 const firebaseConfig = {
@@ -21,14 +20,12 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const storage = getStorage(app);  // Initialize Firebase Storage
 
-
 // Configure Multer
 const storageConfig = multer.memoryStorage();  // Use memory storage
 const upload = multer({ storage: storageConfig }).fields([
     { name: 'cover', maxCount: 1 },
     { name: 'images', maxCount: 10 }
 ]);
-
 
 const sk = process.env.JWT_SECRET
 
@@ -68,17 +65,18 @@ export const postCar = async (req, res) => {
             const images = req.files.images ? req.files.images : [];
 
             // Upload files to Firebase Storage
-            const coverUpload = cover ? await uploadBytes(ref(storage, `cars/${userId}/${cover.originalname}`), cover.buffer) : null;
+            const coverRef = cover ? ref(storage, `cars/${userId}/${cover.originalname}`) : null;
+            const coverUpload = coverRef ? await uploadBytes(coverRef, cover.buffer) : null;
             const imageUploads = await Promise.all(images.map(image => 
                 uploadBytes(ref(storage, `cars/${userId}/${image.originalname}`), image.buffer)
             ));
 
+            // Build URLs for uploaded files
+            const coverImageUrl = coverUpload ? await getDownloadURL(coverRef) : '';
+            const imageUrls = await Promise.all(imageUploads.map(upload => getDownloadURL(ref(storage, `cars/${userId}/${upload.metadata.name}`))));
+
             // Extract form data from req.body
             const { title, make, model, year, transmission, fuel, rate, city, start_date, end_date, location, description } = req.body;
-
-            // Build URLs for uploaded files
-            const coverImageUrl = coverUpload ? await coverUpload.ref.getDownloadURL() : '';
-            const imageUrls = await Promise.all(imageUploads.map(upload => upload.ref.getDownloadURL()));
 
             // Save car data to MongoDB
             const car = new CarModel({
