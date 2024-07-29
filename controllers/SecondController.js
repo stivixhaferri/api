@@ -29,6 +29,9 @@ const upload = multer({ storage: storageConfig }).fields([
     { name: 'images', maxCount: 10 }
 ]);
 
+
+const sk = process.env.JWT_SECRET
+
 // Post Car Route
 export const postCar = async (req, res) => {
     // Apply multer middleware manually
@@ -46,7 +49,7 @@ export const postCar = async (req, res) => {
 
         try {
             // Verify the token and get user data
-            const decoded = jwt.verify(token, process.env.SECRET_KEY);
+            const decoded = jwt.verify(token, sk);
             req.user = decoded;
 
             const userId = req.user.id;
