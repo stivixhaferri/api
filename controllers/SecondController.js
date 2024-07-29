@@ -4,7 +4,7 @@ import UserModel from '../models/User.js';
 import CarModel from '../models/Car.js';
 import jwt from 'jsonwebtoken';
 import { initializeApp } from 'firebase/app';
-import { getAnalytics } from 'firebase/analytics';
+
 
 // Firebase configuration
 const firebaseConfig = {
@@ -20,7 +20,7 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const storage = getStorage(app);  // Initialize Firebase Storage
-const analytics = getAnalytics(app);
+
 
 // Configure Multer
 const storageConfig = multer.memoryStorage();  // Use memory storage
@@ -31,71 +31,78 @@ const upload = multer({ storage: storageConfig }).fields([
 
 // Post Car Route
 export const postCar = async (req, res) => {
-    // Extract token from headers
-    const token = req.headers.token;
-
-    if (!token) {
-        return res.status(401).json({ message: 'Access denied. No token provided.' });
-    }
-
-    try {
-        // Verify the token and get user data
-        const decoded = jwt.verify(token, process.env.SECRET_KEY);
-        req.user = decoded;
-
-        const userId = req.user.id;
-        const user = await UserModel.findById(decoded.userId);
-
-        if (!user) {
-            return res.status(404).json({ message: 'User not found.' });
+    // Apply multer middleware manually
+    upload(req, res, async (err) => {
+        if (err) {
+            return res.status(400).json({ message: 'File upload error: ' + err.message });
         }
 
-        if (user.status !== 'true') {
-            return res.json({ msg: 'You Cannot Access', status: 700 });
+        // Extract token from headers
+        const token = req.headers['x-auth-token'] || req.headers.token;
+
+        if (!token) {
+            return res.status(401).json({ message: 'Access denied. No token provided.' });
         }
 
-        // Extract file data from req.files
-        const cover = req.files.cover ? req.files.cover[0] : null;
-        const images = req.files.images ? req.files.images : [];
+        try {
+            // Verify the token and get user data
+            const decoded = jwt.verify(token, process.env.SECRET_KEY);
+            req.user = decoded;
 
-        // Upload files to Firebase Storage
-        const coverUpload = cover ? await uploadBytes(ref(storage, `cars/${userId}/${cover.originalname}`), cover.buffer) : null;
-        const imageUploads = await Promise.all(images.map(image => 
-            uploadBytes(ref(storage, `cars/${userId}/${image.originalname}`), image.buffer)
-        ));
+            const userId = req.user.id;
+            const user = await UserModel.findById(userId);
 
-        // Extract form data from req.body
-        const { title, make, model, year, transmission, fuel, rate, city, start_date, end_date, location, description } = req.body;
+            if (!user) {
+                return res.status(404).json({ message: 'User not found.' });
+            }
 
-        // Build URLs for uploaded files
-        const coverImageUrl = coverUpload ? await coverUpload.ref.getDownloadURL() : '';
-        const imageUrls = await Promise.all(imageUploads.map(upload => upload.ref.getDownloadURL()));
+            if (user.status !== 'true') {
+                return res.status(403).json({ msg: 'You Cannot Access', status: 700 });
+            }
 
-        // Save car data to MongoDB
-        const car = new CarModel({
-            title,
-            make,
-            model,
-            year,
-            transmission,
-            fuel,
-            rate,
-            city,
-            start_date,
-            end_date,
-            location,
-            description,
-            cover: coverImageUrl,
-            images: imageUrls,
-            userId: decoded.userId,
-        });
+            // Extract file data from req.files
+            const cover = req.files.cover ? req.files.cover[0] : null;
+            const images = req.files.images ? req.files.images : [];
 
-        await car.save();
+            // Upload files to Firebase Storage
+            const coverUpload = cover ? await uploadBytes(ref(storage, `cars/${userId}/${cover.originalname}`), cover.buffer) : null;
+            const imageUploads = await Promise.all(images.map(image => 
+                uploadBytes(ref(storage, `cars/${userId}/${image.originalname}`), image.buffer)
+            ));
 
-        res.status(200).json({ message: 'Car created successfully.' });
+            // Extract form data from req.body
+            const { title, make, model, year, transmission, fuel, rate, city, start_date, end_date, location, description } = req.body;
 
-    } catch (error) {
-        console.log(error);
-        res.status(500).json({ message: error.message });
-    }
+            // Build URLs for uploaded files
+            const coverImageUrl = coverUpload ? await coverUpload.ref.getDownloadURL() : '';
+            const imageUrls = await Promise.all(imageUploads.map(upload => upload.ref.getDownloadURL()));
+
+            // Save car data to MongoDB
+            const car = new CarModel({
+                title,
+                make,
+                model,
+                year,
+                transmission,
+                fuel,
+                rate,
+                city,
+                start_date,
+                end_date,
+                location,
+                description,
+                cover: coverImageUrl,
+                images: imageUrls,
+                userId,
+            });
+
+            await car.save();
+
+            res.status(200).json({ message: 'Car created successfully.' });
+
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ message: 'An error occurred: ' + error.message });
+        }
+    });
 };
