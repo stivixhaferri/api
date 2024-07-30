@@ -435,8 +435,8 @@ export const book = async (req, res) => {
             const { data, error } = await resend.emails.send({
               from: 'Acme <onboarding@resend.dev>',
               to: [`stivixhaferri01@gmail.com`],
-              subject: `ART`,
-              html: `<strong>${email} booked your car:  ${car.make} ${car.model} ${car.year} <br/> from date: ${startDate} to ${endDate}. <br/> Client Email: ${email}, Phone Number: ${phone} <br/> Price: ${total}</strong>`,
+              subject: `AlbaniaRentalTourism (ART)`,
+              html: `<strong>${email} booked your car:  ${car.make} ${car.model} ${car.year} <br/> from date: ${startDate} to ${endDate}. <br/> Client Email: ${email}, Phone Number: ${phone} <br/> Price: ${total * 0.9}</strong>`,
             });
           
             if (error) {

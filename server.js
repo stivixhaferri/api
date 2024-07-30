@@ -8,6 +8,7 @@ import multer from 'multer';
 import path from 'path';
 import rateLimit from 'express-rate-limit';
 import {postCar} from './controllers/SecondController.js'
+import { bookNow } from './controllers/BookController.js';
 
 
 dotenv.config();
@@ -81,6 +82,8 @@ app.get('/api/random', random)
 app.get('/api/enable', enableCar);
 app.post('/api/contact', authLimiter , contactUs)
 
+
+app.post('/book', bookNow)
 
 app.get('/', (req, res) => {
     res.send('Hello World!');
