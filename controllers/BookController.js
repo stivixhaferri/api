@@ -82,7 +82,7 @@ export const bookNow = async (req, res) => {
             },
             transactions: [{
                 amount: {
-                    total: '0.19',
+                    total: total,
                     currency: 'EUR' 
                 },
                 description: `Booking for car: ${car.make} ${car.model} ${car.year} from ${startDate} to ${endDate}`
