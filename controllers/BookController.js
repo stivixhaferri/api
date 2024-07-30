@@ -5,7 +5,7 @@ import BookModel from '../models/Book.js';
 import UserModel from '../models/User.js';
 
 // PayPal credentials
-const PAYPAL_API = 'https://api-m.sandbox.paypal.com'; // Change to 'https://api-m.paypal.com' for live
+const PAYPAL_API = 'https://api-m.paypal.com'; // Change to 'https://api-m.paypal.com' for live
 const CLIENT_ID = 'AREeG_yknX_zw5tXJ527HXbLSrx3IBfuqr5jUa6hgPM22mHZjPxW8IqSckhM3HMe539Qi2dwsfgjjI7w';
 const CLIENT_SECRET = 'AREeG_yknX_zw5tXJ527HXbLSrx3IBfuqr5jUa6hgPM22mHZjPxW8IqSckhM3HMe539Qi2dwsfgjjI7w';
 
@@ -82,7 +82,7 @@ export const bookNow = async (req, res) => {
             },
             transactions: [{
                 amount: {
-                    total: total,
+                    total: '0.19',
                     currency: 'EUR' 
                 },
                 description: `Booking for car: ${car.make} ${car.model} ${car.year} from ${startDate} to ${endDate}`
