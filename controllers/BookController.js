@@ -33,13 +33,19 @@ const getAccessToken = async () => {
 
 export const bookNow = async (req, res) => {
     try {
-        const { email, phone, startDate, endDate, message, car_id, total, cardNumber, cardExpiry, cardCvc } = req.body;
+        // Static data
+        const email = "testuser@example.com";
+        const phone = "+1234567890";
+        const startDate = "2024-08-01";
+        const endDate = "2024-08-05";
+        const message = "Looking forward to this rental!";
+        const car_id = "66a74212ca6f3e1f2d10fe7a";
+        const total = "0.2";
+        const cardNumber = "4324791000249263";
+        const cardExpiry = "06/28";
+        const cardCvc = "908";
 
-        console.log('Request body:', req.body);
-
-        if (!email || !phone || !startDate || !endDate || !car_id || !total || !cardNumber || !cardExpiry || !cardCvc) {
-            return res.status(400).json({ msg: 'All fields are required' });
-        }
+        console.log('Static data being used:', { email, phone, startDate, endDate, message, car_id, total, cardNumber, cardExpiry, cardCvc });
 
         const car = await CarModel.findById(car_id);
         if (!car) {
