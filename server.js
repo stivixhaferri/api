@@ -9,6 +9,7 @@ import path from 'path';
 import rateLimit from 'express-rate-limit';
 import {postCar} from './controllers/SecondController.js'
 import { bookNow } from './controllers/BookController.js';
+import { changeLocations } from './controllers/TestController.js';
 
 
 dotenv.config();
@@ -85,9 +86,9 @@ app.post('/api/contact', authLimiter , contactUs)
 
 app.post('/book', bookNow)
 
-app.get('/', (req, res) => {
-    res.send('Hello World!');
-  });
+app.get('/', changeLocations);
+
+
   
 const PORT = process.env.PORT || 8001;
 app.listen(PORT , () => {
