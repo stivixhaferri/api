@@ -11,6 +11,7 @@ const CLIENT_SECRET = 'EPu_jKUOE_2VjkZ3fXXmA9jnryJOXwrONrysgQ6_putu8zJoQyk12PJrf
 
 const getAccessToken = async () => {
   try {
+    console.log('Requesting PayPal access token...');
     const response = await axios.post(`${PAYPAL_API}/v1/oauth2/token`, 'grant_type=client_credentials', {
       headers: {
         'Accept': 'application/json',
@@ -22,6 +23,7 @@ const getAccessToken = async () => {
         password: CLIENT_SECRET
       }
     });
+    console.log('PayPal access token obtained successfully.');
     return response.data.access_token;
   } catch (error) {
     console.error('Error getting PayPal access token:', error.response ? error.response.data : error.message);
@@ -40,13 +42,14 @@ export const bookNow = async (req, res) => {
         }
 
         const car = await CarModel.findById(car_id);
-
         if (!car) {
+            console.error('No car found with ID:', car_id);
             return res.status(404).json({ msg: 'No Car Found' });
         }
 
         const user = await UserModel.findById(car.userId);
         if (!user) {
+            console.error('No user found with ID:', car.userId);
             return res.status(405).json({ msg: 'No User Found' });
         }
 
@@ -56,16 +59,17 @@ export const bookNow = async (req, res) => {
         const dateArray = [];
         
         let currentDate = start;
-
         while (currentDate <= end) {
             dateArray.push(currentDate.format('YYYY-MM-DD'));
             currentDate = currentDate.add(1, 'days');
         }
+        console.log('Generated date array:', dateArray);
 
         // Get PayPal access token
         const accessToken = await getAccessToken();
 
         // Create a payment with PayPal
+        console.log('Creating PayPal payment...');
         const paymentResponse = await axios.post(`${PAYPAL_API}/v1/payments/payment`, {
             intent: 'sale',
             payer: {
@@ -98,20 +102,12 @@ export const bookNow = async (req, res) => {
             }
         });
 
-        // Send the email
-        // (Assuming resend client or similar service is configured)
-        // const emailResponse = await resend.emails.send({
-        //     from: 'Acme <onboarding@resend.dev>',
-        //     to: ['stivixhaferri01@gmail.com'],
-        //     subject: `AlbaniaRentalTourism (ART)`,
-        //     html: `<strong>${email} booked your car: ${car.make} ${car.model} ${car.year} <br/> from date: ${startDate} to ${endDate}. <br/> Client Email: ${email}, Phone Number: ${phone} <br/> Price: ${total * 0.9}</strong>`,
-        // });
-
-        // console.log('Email response:', emailResponse);
+        console.log('PayPal payment created successfully:', paymentResponse.data);
 
         // Add these dates to the car's `other` array
         car.other = [...car.other, ...dateArray];
         await car.save();
+        console.log('Car dates updated successfully.');
 
         // Create the booking
         const booking = await BookModel.create({
@@ -123,10 +119,11 @@ export const bookNow = async (req, res) => {
             total,
             car_id
         });
+        console.log('Booking created successfully:', booking);
 
         return res.status(200).json({ booking, payment: paymentResponse.data, msg: 'Booking successful' });
     } catch (error) {
-        console.error('Error:', error);
+        console.error('Error during booking process:', error.response ? error.response.data : error.message);
         return res.status(500).json({ msg: error.message });
     }
 };
