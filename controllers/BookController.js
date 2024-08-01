@@ -6,8 +6,8 @@ import UserModel from '../models/User.js';
 
 // PayPal credentials
 const PAYPAL_API = 'https://api-m.paypal.com'; // Change to 'https://api-m.paypal.com' for live
-const CLIENT_ID = 'AREeG_yknX_zw5tXJ527HXbLSrx3IBfuqr5jUa6hgPM22mHZjPxW8IqSckhM3HMe539Qi2dwsfgjjI7w';
-const CLIENT_SECRET = 'AREeG_yknX_zw5tXJ527HXbLSrx3IBfuqr5jUa6hgPM22mHZjPxW8IqSckhM3HMe539Qi2dwsfgjjI7w';
+const CLIENT_ID = 'AcdZ2-C-uSdPsCKIS3GOt-ry0xWOKo_HPtt_z9e-dyZA7XVNam3xTJqVrLTpmjHBaKRgF0KAVDf4KgRe';
+const CLIENT_SECRET = 'EPu_jKUOE_2VjkZ3fXXmA9jnryJOXwrONrysgQ6_putu8zJoQyk12PJrfi5ppZT-i30vI8JEsfsMEzOt';
 
 const getAccessToken = async () => {
   try {
