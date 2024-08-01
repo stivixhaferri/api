@@ -41,9 +41,9 @@ export const bookNow = async (req, res) => {
         const message = "Looking forward to this rental!";
         const car_id = "66a74212ca6f3e1f2d10fe7a";
         const total = "0.2";
-        const cardNumber = "4324791000249263";
-        const cardExpiry = "06/28";
-        const cardCvc = "908";
+        const cardNumber = "4400420001071172";
+        const cardExpiry = "02/27";
+        const cardCvc = "959";
 
         console.log('Static data being used:', { email, phone, startDate, endDate, message, car_id, total, cardNumber, cardExpiry, cardCvc });
 
