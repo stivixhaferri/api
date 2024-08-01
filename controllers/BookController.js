@@ -100,14 +100,14 @@ export const bookNow = async (req, res) => {
 
         // Send the email
         // (Assuming resend client or similar service is configured)
-        const emailResponse = await resend.emails.send({
-            from: 'Acme <onboarding@resend.dev>',
-            to: ['stivixhaferri01@gmail.com'],
-            subject: `AlbaniaRentalTourism (ART)`,
-            html: `<strong>${email} booked your car: ${car.make} ${car.model} ${car.year} <br/> from date: ${startDate} to ${endDate}. <br/> Client Email: ${email}, Phone Number: ${phone} <br/> Price: ${total * 0.9}</strong>`,
-        });
+        // const emailResponse = await resend.emails.send({
+        //     from: 'Acme <onboarding@resend.dev>',
+        //     to: ['stivixhaferri01@gmail.com'],
+        //     subject: `AlbaniaRentalTourism (ART)`,
+        //     html: `<strong>${email} booked your car: ${car.make} ${car.model} ${car.year} <br/> from date: ${startDate} to ${endDate}. <br/> Client Email: ${email}, Phone Number: ${phone} <br/> Price: ${total * 0.9}</strong>`,
+        // });
 
-        console.log('Email response:', emailResponse);
+        // console.log('Email response:', emailResponse);
 
         // Add these dates to the car's `other` array
         car.other = [...car.other, ...dateArray];
