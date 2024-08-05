@@ -40,7 +40,7 @@ export const bookNow = async (req, res) => {
     const endDate = "2024-08-05";
     const message = "Looking forward to this rental!";
     const car_id = "66a74212ca6f3e1f2d10fe7a";
-    const total = "0.2"; // Ensure this is a numeric string or number as required
+    const total = "0.02"; // Ensure this is a numeric string or number as required
     // const cardNumber = "4111111111111111"; // Use a valid test card number
     // const cardExpiry = "06/28";
     // const cardCvc = "123"; // Use a valid CVV for the card
