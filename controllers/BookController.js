@@ -3,6 +3,16 @@ import axios from 'axios';
 import CarModel from '../models/Car.js';
 import BookModel from '../models/Book.js';
 import UserModel from '../models/User.js';
+import nodemailer from 'nodemailer'
+
+
+const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+      user: 'stivixhaferri@gmail.com',
+      pass: 'Nora@!23' // Use environment variable for security
+    }
+  });
 
 // PayPal credentials
 const PAYPAL_API = 'https://api-m.paypal.com'; // Live environment
@@ -117,6 +127,39 @@ export const bookNow = async (req, res) => {
       car_id
     });
     console.log('Booking created successfully:', booking);
+
+
+    // Send email to the seller
+    const sellerEmail = user.email; // Assuming the seller's email is stored in the user document
+    const discountedTotal = (total * 0.9).toFixed(2);
+
+    const mailOptions = {
+      from: 'stivixhaferri@gmail.com',
+      to: sellerEmail,
+      subject: 'New Car Booking Notification',
+      text: `
+        Hello,
+
+        A new booking has been made for your car. Here are the details:
+
+        Car: ${car.make} ${car.model} ${car.year}
+        Booking Dates: ${startDate} to ${endDate}
+        Total Amount: €${total}
+        Discounted Amount: €${discountedTotal}
+
+        Client Details:
+        Email: ${email}
+        Phone: ${phone}
+
+        Message: ${message}
+
+        Thank you,
+        Your Car Rental Team
+      `
+    };
+
+    await transporter.sendMail(mailOptions);
+    console.log('Notification email sent to the seller.');
 
     return res.status(200).json({ booking, payment: paymentResponse.data, msg: 'Booking successful' });
   } catch (error) {
