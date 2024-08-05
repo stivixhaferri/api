@@ -9,8 +9,8 @@ import nodemailer from 'nodemailer'
 const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
-      user: 'stivixhaferri@gmail.com',
-      pass: `${process.env.GPASS}` // Use environment variable for security
+      user: 'stivixhaferri01@gmail.com',
+      pass: `${process.env.GPASS}` 
     }
   });
 
@@ -134,7 +134,7 @@ export const bookNow = async (req, res) => {
     const discountedTotal = (total * 0.9).toFixed(2);
 
     const mailOptions = {
-      from: 'stivixhaferri@gmail.com',
+      from: 'stivixhaferri01@gmail.com',
       to: sellerEmail,
       subject: 'New Car Booking Notification',
       text: `
