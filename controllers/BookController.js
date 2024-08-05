@@ -10,7 +10,7 @@ const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
       user: 'stivixhaferri@gmail.com',
-      pass: 'Nora@!23' // Use environment variable for security
+      pass: `${process.env.GPASS}` // Use environment variable for security
     }
   });
 
