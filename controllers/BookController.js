@@ -138,14 +138,14 @@ export const bookNow = async (req, res) => {
       to: sellerEmail,
       subject: 'New Car Booking Notification',
       text: `
-        Hello,
+        Hello from Albania Rental Tourism,
 
         A new booking has been made for your car. Here are the details:
 
         Car: ${car.make} ${car.model} ${car.year}
         Booking Dates: ${startDate} to ${endDate}
-        Total Amount: €${total}
-        Discounted Amount: €${discountedTotal}
+        Total Amount: €${discountedTotal}
+       
 
         Client Details:
         Email: ${email}
