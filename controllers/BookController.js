@@ -195,18 +195,17 @@ const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
     user: 'stivixhaferri01@gmail.com',
-    pass: 'bbgd dkcs zoem hvmr' 
+    pass: 'your-email-password' // Consider using environment variables for sensitive data
   }
 });
 
 // PayPal credentials
 const PAYPAL_API = 'https://api-m.paypal.com'; // Live environment
-const CLIENT_ID = 'Af5oAH4IGvBf74g0OZxQjIu03shlNAehWefT7bcnzSKLbI2C51-808rOsjy71-Dspj4yNJwjOLG7eI6u'; 
-const CLIENT_SECRET = 'EKxhQi-nN_7w_1MqjophSvpwwGh32HScavUuWEzIQGGdeBQImmedn1SKWM-wEwrFinu5LhAzgF0H1d85'; 
+const CLIENT_ID = 'your-client-id'; 
+const CLIENT_SECRET = 'your-client-secret'; 
 
 const getAccessToken = async () => {
   try {
-    console.log('Requesting PayPal access token...');
     const response = await axios.post(`${PAYPAL_API}/v1/oauth2/token`, 'grant_type=client_credentials', {
       headers: {
         'Accept': 'application/json',
@@ -218,7 +217,6 @@ const getAccessToken = async () => {
         password: CLIENT_SECRET
       }
     });
-    console.log('PayPal access token obtained successfully.');
     return response.data.access_token;
   } catch (error) {
     console.error('Error getting PayPal access token:', error.response ? error.response.data : error.message);
@@ -233,7 +231,7 @@ const createOrder = async (accessToken, total, description) => {
       purchase_units: [{
         amount: {
           currency_code: 'EUR',
-          value: (total * 0.1).toFixed(2).toString()
+          value: total.toFixed(2) // Ensure the total is correctly formatted
         },
         description
       }],
@@ -273,25 +271,15 @@ export const bookNow = async (req, res) => {
   try {
     const { email, phone, startDate, endDate, message, car_id, total } = req.body;
 
-    console.log('Static data being used:', { email, phone, startDate, endDate, message, car_id, total });
-
     const car = await CarModel.findById(car_id);
-    if (!car) {
-      console.error('No car found with ID:', car_id);
-      return res.status(404).json({ msg: 'No Car Found' });
-    }
+    if (!car) return res.status(404).json({ msg: 'No Car Found' });
 
     const user = await UserModel.findById(car.userId);
-    if (!user) {
-      console.error('No user found with ID:', car.userId);
-      return res.status(405).json({ msg: 'No User Found' });
-    }
+    if (!user) return res.status(404).json({ msg: 'No User Found' });
 
-    // Generate array of dates between startDate and endDate
     const start = moment(startDate);
     const end = moment(endDate);
     const dateArray = [];
-    
     let currentDate = start;
     while (currentDate <= end) {
       dateArray.push(currentDate.format('YYYY-MM-DD'));
@@ -300,19 +288,13 @@ export const bookNow = async (req, res) => {
 
     const accessToken = await getAccessToken();
 
-    // Create PayPal order
     const paymentResponse = await createOrder(accessToken, total, `Booking for car: ${car.make} ${car.model} ${car.year} from ${startDate} to ${endDate}`);
-    console.log('PayPal payment created successfully:', paymentResponse.data);
-
     const orderId = paymentResponse.id;
-    const captureResponse = await captureOrder(accessToken, orderId);
+    await captureOrder(accessToken, orderId);
 
-    // Update car availability
     car.other = [...car.other, ...dateArray];
     await car.save();
-    console.log('Car dates updated successfully.');
-    
-    // Create the booking
+
     const booking = await BookModel.create({
       email,
       phone,
@@ -322,10 +304,8 @@ export const bookNow = async (req, res) => {
       total,
       car_id
     });
-    console.log('Booking created successfully:', booking);
 
-    // Send email to the seller
-    const sellerEmail = user.email; // Assuming the seller's email is stored in the user document
+    const sellerEmail = user.email; 
     const discountedTotal = (total * 0.9).toFixed(2);
 
     const mailOptions = {
@@ -354,9 +334,9 @@ export const bookNow = async (req, res) => {
 
     await transporter.sendMail(mailOptions);
 
-    return res.status(200).json({ booking: paymentResponse.data, msg: 'Booking successful' });
+    return res.status(200).json({ booking: paymentResponse, msg: 'Booking successful' });
   } catch (error) {
     console.error('Error during booking process:', error.response ? error.response.data : error.message);
-    return res.status(500).json({ msg: error.message });
+    return res.status(500).json({ msg: 'Error processing booking' });
   }
 };
