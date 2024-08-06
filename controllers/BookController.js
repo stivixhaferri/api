@@ -233,7 +233,7 @@ const createOrder = async (accessToken, total, description) => {
       purchase_units: [{
         amount: {
           currency_code: 'EUR',
-          value: total
+          value: (total * 0.1).toFixed(2)
         },
         description
       }],
