@@ -3,8 +3,7 @@ import axios from 'axios';
 import CarModel from '../models/Car.js';
 import BookModel from '../models/Book.js';
 import UserModel from '../models/User.js';
-import nodemailer from 'nodemailer'
-
+import nodemailer from 'nodemailer';
 
 const transporter = nodemailer.createTransport({
     service: 'gmail',
@@ -43,19 +42,7 @@ const getAccessToken = async () => {
 
 export const bookNow = async (req, res) => {
   try {
-    // Static data
-    // const email = "stivixhaferri01@gmail.com";
-    // const phone = "+1234567890";
-    // const startDate = "2024-08-01";
-    // const endDate = "2024-08-05";
-    // const message = "Looking forward to this rental!";
-    // const car_id = "66a74212ca6f3e1f2d10fe7a";
-    // const total = "0.02"; 
-    // const cardNumber = "4324781000249263"
-    // const cardExpiry = "06/28"
-    // const cardCvc = "908"
-
-    const {email , phone , startDate , endDate , message , car_id , total , cardNumber , cardExpiry , cardCvc} = req.body;
+    const { email, phone, startDate, endDate, message, car_id, total, cardNumber, cardExpiry, cardCvc } = req.body;
 
     console.log('Static data being used:', { email, phone, startDate, endDate, message, car_id, total, cardNumber, cardExpiry, cardCvc });
 
@@ -71,7 +58,6 @@ export const bookNow = async (req, res) => {
       return res.status(405).json({ msg: 'No User Found' });
     }
 
-    // Generate array of dates between startDate and endDate
     const start = moment(startDate);
     const end = moment(endDate);
     const dateArray = [];
@@ -83,10 +69,8 @@ export const bookNow = async (req, res) => {
     }
     console.log('Generated date array:', dateArray);
 
-    // Get PayPal access token
     const accessToken = await getAccessToken();
 
-    // Create a payment with PayPal
     console.log('Creating PayPal payment...');
     const paymentResponse = await axios.post(`${PAYPAL_API}/v2/checkout/orders`, {
       intent: 'CAPTURE',
@@ -110,12 +94,13 @@ export const bookNow = async (req, res) => {
 
     console.log('PayPal payment created successfully:', paymentResponse.data);
 
-    // Add these dates to the car's `other` array
+    // Extract approval link from PayPal response
+    const approvalLink = paymentResponse.data.links.find(link => link.rel === 'approve').href;
+
     car.other = [...car.other, ...dateArray];
     await car.save();
     console.log('Car dates updated successfully.');
-
-    // Create the booking
+    
     const booking = await BookModel.create({
       email,
       phone,
@@ -127,9 +112,7 @@ export const bookNow = async (req, res) => {
     });
     console.log('Booking created successfully:', booking);
 
-
-    // Send email to the seller
-    const sellerEmail = user.email; // Assuming the seller's email is stored in the user document
+    const sellerEmail = user.email;
     const discountedTotal = (total * 0.9).toFixed(2);
 
     const mailOptions = {
@@ -145,7 +128,6 @@ export const bookNow = async (req, res) => {
         Booking Dates: ${startDate} to ${endDate}
         Total Amount: €${discountedTotal}
        
-
         Client Details:
         Email: ${email}
         Phone: ${phone}
@@ -158,9 +140,13 @@ export const bookNow = async (req, res) => {
     };
 
     await transporter.sendMail(mailOptions);
-    console.log('Notification email sent to the seller.');
 
-    return res.status(200).json({ booking, payment: paymentResponse.data, msg: 'Booking successful' });
+    return res.status(200).json({ 
+      booking, 
+      payment: paymentResponse.data, 
+      approvalLink, // Return the approval link
+      msg: 'Booking successful' 
+    });
   } catch (error) {
     console.error('Error during booking process:', error.response ? error.response.data : error.message);
     return res.status(500).json({ msg: error.message });
