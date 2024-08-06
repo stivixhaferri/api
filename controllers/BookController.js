@@ -341,12 +341,11 @@ export const bookNow = async (req, res) => {
 
     await transporter.sendMail(mailOptions);
 
-    // Return the booking and payment details including the PayPal order ID
+
     return res.status(200).json({ 
-      booking, 
-    //   payment: paymentResponse.data, 
-      paypalOrderId: retrievedOrderId, 
-      another: 'here',
+    //   booking, 
+      booking: paymentResponse.data, 
+    //   paypalOrderId: retrievedOrderId, 
       msg: 'Booking successful' 
     });
   } catch (error) {
