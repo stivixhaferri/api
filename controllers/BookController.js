@@ -129,7 +129,7 @@ export const bookNow = async (req, res) => {
       }
     });
 
-    captureResponse();
+    // captureResponse();
 
     // Add these dates to the car's `other` array
     car.other = [...car.other, ...dateArray];
