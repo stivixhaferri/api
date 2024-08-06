@@ -344,8 +344,9 @@ export const bookNow = async (req, res) => {
     // Return the booking and payment details including the PayPal order ID
     return res.status(200).json({ 
       booking, 
-      payment: paymentResponse.data, 
-      paypalOrderId: retrievedOrderId, // Include PayPal order ID in response
+    //   payment: paymentResponse.data, 
+      paypalOrderId: retrievedOrderId, 
+      another: 'here',
       msg: 'Booking successful' 
     });
   } catch (error) {
