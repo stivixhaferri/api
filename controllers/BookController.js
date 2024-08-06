@@ -122,12 +122,12 @@ export const bookNow = async (req, res) => {
    
 
     // Capture the payment immediately
-    const captureResponse = await axios.post(`${PAYPAL_API}/v2/checkout/orders/${orderId}/capture`, {}, {
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${accessToken}`
-      }
-    });
+    // const captureResponse = await axios.post(`${PAYPAL_API}/v2/checkout/orders/${orderId}/capture`, {}, {
+    //   headers: {
+    //     'Content-Type': 'application/json',
+    //     'Authorization': `Bearer ${accessToken}`
+    //   }
+    // });
 
     // captureResponse();
 
